@@ -22,7 +22,6 @@ env:
 
 jobs:
   build:
-    if: github.repository == 'macroquest/macroquest'
     runs-on: [fast, self-hosted, Windows, X64]
     steps:
       - name: Install and cache PowerShell modules
