@@ -1,6 +1,6 @@
 [submodule "src/eqlib"]
 	path = src/eqlib
-	url = https://github.com/Krakty/eqlib.git
+	url = https://github.com/awcook97/eqlib.git
     branch = apr7-2026-test
 [submodule "contrib/vcpkg"]
 	path = contrib/vcpkg
