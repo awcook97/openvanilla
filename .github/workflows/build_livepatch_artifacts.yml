@@ -41,8 +41,19 @@ jobs:
       - name: Restore NuGet packages
         run: nuget restore src/MacroQuest.sln
 
-      - name: vcpkg Cache
-        id: cache-vcpkg
+      - name: Check vcpkg Installation
+        id: check_vcpkg
+        shell: pwsh
+        run: |
+          $installedPath = "${{ github.workspace }}/contrib/vcpkg/installed"
+          if ((Test-Path $installedPath) -and (Get-ChildItem $installedPath -Directory | Measure-Object).Count -gt 0) {
+            echo "vcpkg_installed=true" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "vcpkg_installed=false" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Restore vcpkg Cache
+        if: steps.check_vcpkg.outputs.vcpkg_installed != 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -52,24 +63,12 @@ jobs:
             contrib/vcpkg/packages
             contrib/vcpkg/vcpkg.exe
             contrib/vcpkg/vcpkg_mq_last_bootstrap*.txt
-          key: ${{ runner.os }}-vcpkg-${{ env.platform }}-${{ github.run_id }}
+          key: ${{ runner.os }}-vcpkg-${{ env.platform }}-${{ hashFiles('contrib/vcpkg/scripts/vcpkg-tool-metadata.txt') }}
           restore-keys: |
             ${{ runner.os }}-vcpkg-${{ env.platform }}-
             ${{ runner.os }}-vcpkg-
 
-      - name: Bootstrap vcpkg
-        run: |
-          if (-Not (Test-Path "contrib\vcpkg\vcpkg.exe")) {
-            contrib\vcpkg\bootstrap-vcpkg.bat -disableMetrics
-          } else {
-            Write-Host "vcpkg.exe already exists (from cache), skipping bootstrap"
-          }
-        shell: pwsh
-
       - name: Build ${{ env.platform }} Release for ${{ inputs.client_target }}
-        env:
-          VCPKG_DISABLE_METRICS: 1
-          GIT: "C:\\Program Files\\Git\\cmd\\git.exe"
         run: msbuild src/MacroQuest.sln /NoLogo /Verbosity:minimal /p:Configuration=Release /p:Platform=${{ env.platform }} /m /p:PreferredToolArchitecture=x64
 
       - name: Upload build artifacts
