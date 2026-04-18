@@ -1,4 +1,4 @@
-name: Build livepatch (with Artifacts)
+name: Build Test (with Artifacts)
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
       client_target:
         required: true
         type: choice
-        default: live
+        default: test
         options:
           - live
           - test
