@@ -57,6 +57,9 @@ jobs:
             ${{ runner.os }}-vcpkg-${{ env.platform }}-
             ${{ runner.os }}-vcpkg-
 
+      - name: Bootstrap vcpkg
+        run: contrib/vcpkg/bootstrap-vcpkg.bat -disableMetrics
+
       - name: Build ${{ env.platform }} Release for ${{ inputs.client_target }}
         run: msbuild src/MacroQuest.sln /NoLogo /Verbosity:minimal /p:Configuration=Release /p:Platform=${{ env.platform }} /m /p:PreferredToolArchitecture=x64
 
