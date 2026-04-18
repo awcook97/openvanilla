@@ -58,9 +58,18 @@ jobs:
             ${{ runner.os }}-vcpkg-
 
       - name: Bootstrap vcpkg
-        run: contrib/vcpkg/bootstrap-vcpkg.bat -disableMetrics
+        run: |
+          if (-Not (Test-Path "contrib\vcpkg\vcpkg.exe")) {
+            contrib\vcpkg\bootstrap-vcpkg.bat -disableMetrics
+          } else {
+            Write-Host "vcpkg.exe already exists (from cache), skipping bootstrap"
+          }
+        shell: pwsh
 
       - name: Build ${{ env.platform }} Release for ${{ inputs.client_target }}
+        env:
+          VCPKG_DISABLE_METRICS: 1
+          GIT: "C:\\Program Files\\Git\\cmd\\git.exe"
         run: msbuild src/MacroQuest.sln /NoLogo /Verbosity:minimal /p:Configuration=Release /p:Platform=${{ env.platform }} /m /p:PreferredToolArchitecture=x64
 
       - name: Upload build artifacts
